@@ -1302,6 +1302,28 @@ accountingRouter.get('/accounting/postponement', async (req, res) => {
         })
     }
 })
+accountingRouter.get('/accounting/set-up-accounting', async (req, res) => {
+    try {
+        await axios.get('http://localhost:9999/accounting/pdc')
+        await axios.get('http://localhost:9999/accounting/collection')
+        await axios.get('http://localhost:9999/accounting/deposit')
+        await axios.get('http://localhost:9999/accounting/returned-checks')
+        await axios.get('http://localhost:9999/accounting/petty-cash')
+        await axios.get('http://localhost:9999/accounting/cash-disbursement')
+        await axios.get('http://localhost:9999/accounting/pullout')
+        await axios.get('http://localhost:9999/accounting/postponement')
+
+        res.send({
+            message: "",
+            success: true,
+        })
+    } catch (err) {
+        res.send({
+            message: err.message,
+            success: false,
+        })
+    }
+})
 
 module.exports = {
     accountingRouter

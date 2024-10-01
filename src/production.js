@@ -1034,6 +1034,29 @@ productionRouter.get('/production/journal', async (req, res) => {
         })
     }
 })
+productionRouter.get('/production/set-up-production', async (req, res) => {
+    try {
+        await axios.get('http://localhost:9999/production/vpolicy')
+        await axios.get('http://localhost:9999/production/cglpolicy')
+        await axios.get('http://localhost:9999/production/bpolicy')
+        await axios.get('http://localhost:9999/production/fpolicy')
+        await axios.get('http://localhost:9999/production/mpolicy')
+        await axios.get('http://localhost:9999/production/msprpolicy')
+        await axios.get('http://localhost:9999/production/papolicy')
+        await axios.get('http://localhost:9999/production/policy')
+        await axios.get('http://localhost:9999/production/journal')
+
+        res.send({
+            message: "",
+            success: true,
+        })
+    } catch (err) {
+        res.send({
+            message: err.message,
+            success: false,
+        })
+    }
+})
 
 
 
