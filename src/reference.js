@@ -728,6 +728,72 @@ referenceRouter.get('/reference/transaction-code', async (req, res) => {
         })
     }
 })
+referenceRouter.get('/reference/ctplp-registration', async (req, res) => {
+    try {
+
+        await executeQueryToMSQL({ query: 'delete from ctplregistration ' })
+        await fetchDataInBatches({
+            batchSize: 1000,
+            query: `
+                SELECT  [Prefix]
+                        ,[NumSeriesFrom]
+                        ,[NumSeriesTo]
+                        ,[Cost]
+                        ,[CreatedBy]
+                        ,[CreatedDate]
+                        ,RIGHT('000000' + CAST(ROW_NUMBER() OVER (ORDER BY (SELECT NULL)) AS VARCHAR(5)), 5) AS ctplId
+                    FROM [Upward].[dbo].[CTPLRegistration]
+                    ORDER BY Prefix
+            `, cb: async (row) => {
+                await executeQueryToMSQL({
+                    query: `
+                INSERT INTO \`ctplregistration\`
+                (\`ctplId\`,
+                \`Prefix\`,
+                \`NumSeriesFrom\`,
+                \`NumSeriesTo\`,
+                \`Cost\`,
+                \`CreatedBy\`,
+                \`createdAt\`,
+                \`update\`,
+                \`ctplType\`)
+                VALUES
+                (?,
+                ?,
+                ?,
+                ?,
+                ?,
+                ?,
+                now(),
+                now(),
+                ?);
+
+                    `,
+                    parameters: [
+                        row.ctplId,
+                        row.Prefix,
+                        row.NumSeriesFrom,
+                        row.NumSeriesTo,
+                        row.Cost,
+                        row.CreatedBy,
+                        ''
+                    ]
+                })
+            }
+        })
+        res.send({
+            message: "",
+            success: true,
+        })
+    } catch (err) {
+        console.log(err)
+        res.send({
+            message: err.message,
+            success: false,
+        })
+    }
+})
+
 referenceRouter.get('/reference/id-entry', async (req, res) => {
     try {
         await executeQueryToMSQL({ query: "delete from entry_agent" })
@@ -1186,6 +1252,7 @@ referenceRouter.get('/reference/id-entry', async (req, res) => {
         })
     }
 })
+
 
 module.exports = {
     referenceRouter
