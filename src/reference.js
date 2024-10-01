@@ -729,7 +729,6 @@ referenceRouter.get('/reference/transaction-code', async (req, res) => {
     }
 })
 referenceRouter.get('/reference/id-entry', async (req, res) => {
-
     try {
         await executeQueryToMSQL({ query: "delete from entry_agent" })
         await executeQueryToMSQL({ query: "delete from entry_employee" })
@@ -737,6 +736,7 @@ referenceRouter.get('/reference/id-entry', async (req, res) => {
         await executeQueryToMSQL({ query: "delete from entry_supplier" })
         await executeQueryToMSQL({ query: "delete from entry_others" })
         await executeQueryToMSQL({ query: "delete from entry_client" })
+        await executeQueryToMSQL({ query: "delete from table1" })
         await fetchDataInBatches({
             batchSize: 1000,
             query: `
@@ -1000,7 +1000,7 @@ referenceRouter.get('/reference/id-entry', async (req, res) => {
                         parameters: [
                             row.newID,
                             contact_details_id,
-                            row.Individual === 1 ?  row.Firstname : "",
+                            row.Individual === 1 ? row.Firstname : "",
                             row.Individual === 1 ? row.Lastname : "",
                             row.Individual === 1 ? row.Middle : "",
                             row.Individual === 1 ? "" : row.Shortname,
@@ -1106,7 +1106,7 @@ referenceRouter.get('/reference/id-entry', async (req, res) => {
                         parameters: [
                             row.newID,
                             '',
-                            row.Individual === 1 ?  row.Firstname : "",
+                            row.Individual === 1 ? row.Firstname : "",
                             row.Individual === 1 ? row.Lastname : "",
                             row.Individual === 1 ? row.Middle : "",
                             row.Individual === 1 ? "" : row.Shortname,
@@ -1118,11 +1118,59 @@ referenceRouter.get('/reference/id-entry', async (req, res) => {
                             '',
                             '',
                             contact_details_id
-                            
+
                         ]
                     })
                 }
-
+                await executeQueryToMSQL({
+                    query: `INSERT INTO \`table1\`
+                        (\`IDNo\`,
+                        \`IDType\`,
+                        \`Sub_Acct\`,
+                        \`Firstname\`,
+                        \`Middle\`,
+                        \`Lastname\`,
+                        \`Individual\`,
+                        \`UnitNo\`,
+                        \`Street\`,
+                        \`City\`,
+                        \`Address\`,
+                        \`Contact\`,
+                        \`Shortname\`,
+                        \`Inactive\`)
+                        VALUES
+                        (?,
+                        ?,
+                        ?,
+                        ?,
+                        ?,
+                        ?,
+                        ?,
+                        ?,
+                        ?,
+                        ?,
+                        ?,
+                        ?,
+                        ?,
+                        ?);
+                        `,
+                    parameters: [
+                        row.IDNo,
+                        '',
+                        '',
+                        row.newID,
+                        '',
+                        '',
+                        0,
+                        '',
+                        '',
+                        '',
+                        '',
+                        '',
+                        '',
+                        false,
+                    ]
+                })
             }
         })
 
