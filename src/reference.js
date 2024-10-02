@@ -2,7 +2,6 @@ const express = require('express')
 const referenceRouter = express.Router()
 const { executeQueryToMSQL, fetchDataInBatches } = require("../libs")
 const { v4: v4uuid } = require('uuid')
-const { default: axios } = require('axios')
 
 referenceRouter.get('/reference/policy-account', async (req, res) => {
     try {
@@ -1252,36 +1251,6 @@ referenceRouter.get('/reference/id-entry', async (req, res) => {
         })
     }
 })
-referenceRouter.get('/reference/set-up-reference',async(req,res)=>{
-    try {
-        await axios.get('http://localhost:9999/reference/policy-account')
-        await axios.get('http://localhost:9999/reference/bank')
-        await axios.get('http://localhost:9999/reference/bank-account')
-        await axios.get('http://localhost:9999/reference/booklet')
-        await axios.get('http://localhost:9999/reference/books')
-        await axios.get('http://localhost:9999/reference/chart-account')
-        await axios.get('http://localhost:9999/reference/mortgagee')
-        await axios.get('http://localhost:9999/reference/petty-log')
-        await axios.get('http://localhost:9999/reference/rates')
-        await axios.get('http://localhost:9999/reference/sub-account')
-        await axios.get('http://localhost:9999/reference/subline')
-        await axios.get('http://localhost:9999/reference/transaction-code')
-        await axios.get('http://localhost:9999/reference/ctplp-registration')
-        await axios.get('http://localhost:9999/reference/id-entry')
-
-        res.send({
-            message: "",
-            success: true,
-        })
-    } catch (error) {
-        res.send({
-            message: err.message,
-            success: false,
-        })
-    }
-})
-
-
 
 module.exports = {
     referenceRouter

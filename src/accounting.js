@@ -115,8 +115,8 @@ accountingRouter.get('/accounting/pdc', async (req, res) => {
         })
 
         await executeQueryToMSQL({
-            query: `update  upward_test.pdc a left join table1 b on a.IDNo = b.IDNo set a.IDNo = b.Firstname where b.Firstname is not null;
-`})
+            query: `update  pdc a left join table1 b on a.IDNo = b.IDNo set a.IDNo = b.Firstname where b.Firstname is not null;
+            `})
 
         res.send({
             message: "",
@@ -266,8 +266,8 @@ accountingRouter.get('/accounting/collection', async (req, res) => {
                 })
             }
         })
-        await executeQueryToMSQL({ query: ` update upward_test.collection a left join table1 b on a.CRLoanID = b.IDNo set a.CRLoanID = b.Firstname  where b.Firstname is not null ;    ` })
-        await executeQueryToMSQL({ query: ` update upward_test.collection a left join table1 b on a.IDNo = b.IDNo set a.IDNo = b.Firstname  where b.Firstname is not null ;    ` })
+        await executeQueryToMSQL({ query: ` update collection a left join table1 b on a.CRLoanID = b.IDNo set a.CRLoanID = b.Firstname  where b.Firstname is not null ;    ` })
+        await executeQueryToMSQL({ query: ` update collection a left join table1 b on a.IDNo = b.IDNo set a.IDNo = b.Firstname  where b.Firstname is not null ;    ` })
 
         res.send({
             message: "",
@@ -284,6 +284,9 @@ accountingRouter.get('/accounting/deposit', async (req, res) => {
     try {
         await executeQueryToMSQL({ query: `delete from deposit` })
         await executeQueryToMSQL({ query: `delete from deposit_slip` })
+        await executeQueryToMSQL({ query: `delete from cash_breakdown` })
+
+
         await fetchDataInBatches({
             batchSize: 1000,
             query: `
@@ -427,7 +430,95 @@ accountingRouter.get('/accounting/deposit', async (req, res) => {
                 })
             }
         })
-        await executeQueryToMSQL({ query: ` update upward_test.deposit_slip a left join table1 b on a.IDNo = b.IDNo set  a.IDNo = b.Firstname  where b.Firstname is not null ;` })
+        await fetchDataInBatches({
+            batchSize: 1000,
+            query: `
+           SELECT  [Cash_Breakdown].[Slip_Code]
+                ,[Pap_1000]
+                ,[Pap_500]
+                ,[Pap_100]
+                ,[Pap_50]
+                ,[Pap_20]
+                ,[Pap_10]
+                ,[Pap_5]
+                ,[Coin_5]
+                ,[Coin_2]
+                ,[Coin_1]
+                ,[Cnt_50]
+                ,[Cnt_25]
+                ,[Cnt_10]
+                ,[Cnt_05]
+                ,[Cnt_01]
+                ,[Pap_200]
+                
+            FROM [Upward].[dbo].[Cash_Breakdown] left join [Upward].[dbo].[Deposit] on [Cash_Breakdown].Slip_Code = [Deposit].Slip_Code   
+            where [Deposit].Slip_Code is not null and [Deposit].Temp_SlipDate >= '2020-01-01'
+            ORDER BY [Slip_Code]
+            `, cb: async (row) => {
+
+                await executeQueryToMSQL({
+                    query: `
+                    INSERT INTO \`cash_breakdown\`
+                        (\`Slip_Code\`,
+                        \`Pap_1000\`,
+                        \`Pap_500\`,
+                        \`Pap_100\`,
+                        \`Pap_50\`,
+                        \`Pap_20\`,
+                        \`Pap_10\`,
+                        \`Pap_5\`,
+                        \`Coin_5\`,
+                        \`Coin_2\`,
+                        \`Coin_1\`,
+                        \`Cnt_50\`,
+                        \`Cnt_25\`,
+                        \`Cnt_10\`,
+                        \`Cnt_05\`,
+                        \`Cnt_01\`,
+                        \`Pap_200\`)
+                        VALUES
+                        (?,
+                        ?,
+                        ?,
+                        ?,
+                        ?,
+                        ?,
+                        ?,
+                        ?,
+                        ?,
+                        ?,
+                        ?,
+                        ?,
+                        ?,
+                        ?,
+                        ?,
+                        ?,
+                        ?);
+                    `,
+                    parameters: [
+                        row.Slip_Code,
+                        row.Pap_1000,
+                        row.Pap_500,
+                        row.Pap_100,
+                        row.Pap_50,
+                        row.Pap_20,
+                        row.Pap_10,
+                        row.Pap_5,
+                        row.Coin_5,
+                        row.Coin_2,
+                        row.Coin_1,
+                        row.Cnt_50,
+                        row.Cnt_25,
+                        row.Cnt_10,
+                        row.Cnt_05,
+                        row.Cnt_01,
+                        row.Pap_200,
+                    ]
+                })
+            }
+        })
+
+        await executeQueryToMSQL({ query: ` update deposit_slip a left join table1 b on a.IDNo = b.IDNo set  a.IDNo = b.Firstname  where b.Firstname is not null ;` })
         res.send({
             message: "",
             success: true,
@@ -530,7 +621,7 @@ accountingRouter.get('/accounting/returned-checks', async (req, res) => {
             }
         })
 
-        await executeQueryToMSQL({ query: ` update upward_test.deposit_slip a left join table1 b on a.IDNo = b.IDNo set  a.IDNo = b.Firstname  where b.Firstname is not null ;` })
+        await executeQueryToMSQL({ query: ` update deposit_slip a left join table1 b on a.IDNo = b.IDNo set  a.IDNo = b.Firstname  where b.Firstname is not null ;` })
         res.send({
             message: "",
             success: true,
@@ -636,7 +727,7 @@ accountingRouter.get('/accounting/petty-cash', async (req, res) => {
                 })
             }
         })
-        await executeQueryToMSQL({ query: ` update upward_test.petty_cash a left join table1 b on a.IDNo = b.IDNo set a.IDNo = b.Firstname   where b.Firstname is not null ;` })
+        await executeQueryToMSQL({ query: ` update petty_cash a left join table1 b on a.IDNo = b.IDNo set a.IDNo = b.Firstname   where b.Firstname is not null ;` })
 
         res.send({
             message: "",
@@ -787,7 +878,7 @@ accountingRouter.get('/accounting/general-journal', async (req, res) => {
                 })
             }
         })
-        await executeQueryToMSQL({ query: `  update upward_test.journal_voucher a left join table1 b on a.ID_No = b.IDNo set a.ID_No = b.Firstname    where b.Firstname is not null ;` })
+        await executeQueryToMSQL({ query: `  update journal_voucher a left join table1 b on a.ID_No = b.IDNo set a.ID_No = b.Firstname    where b.Firstname is not null ;` })
 
         res.send({
             message: "",
@@ -936,7 +1027,7 @@ accountingRouter.get('/accounting/cash-disbursement', async (req, res) => {
                 })
             }
         })
-        await executeQueryToMSQL({ query: ` update upward_test.cash_disbursement a left join table1 b on a.ID_No = b.IDNo set a.ID_No = b.Firstname    where b.Firstname is not null ; ` })
+        await executeQueryToMSQL({ query: ` update cash_disbursement a left join table1 b on a.ID_No = b.IDNo set a.ID_No = b.Firstname    where b.Firstname is not null ; ` })
 
         res.send({
             message: "",
@@ -1094,7 +1185,7 @@ accountingRouter.get('/accounting/pullout', async (req, res) => {
                 })
             }
         })
-        await executeQueryToMSQL({ query: ` update upward_test.pullout_request a left join table1 b on a.PNNo = b.IDNo  set a.PNNo = b.Firstname  where b.Firstname is not null ;    ` })
+        await executeQueryToMSQL({ query: ` update pullout_request a left join table1 b on a.PNNo = b.IDNo  set a.PNNo = b.Firstname  where b.Firstname is not null ;    ` })
 
         res.send({
             message: "",
@@ -1290,7 +1381,7 @@ accountingRouter.get('/accounting/postponement', async (req, res) => {
             }
         })
 
-        await fetchDataInBatches({query:`update  upward_test.postponement a left join table1 b on a.PNNo = b.IDNo  set  a.PNNo = b.Firstname where b.Firstname is not null; `})
+        await fetchDataInBatches({ query: `update  postponement a left join table1 b on a.PNNo = b.IDNo  set  a.PNNo = b.Firstname where b.Firstname is not null; ` })
         res.send({
             message: "",
             success: true,
@@ -1302,28 +1393,7 @@ accountingRouter.get('/accounting/postponement', async (req, res) => {
         })
     }
 })
-accountingRouter.get('/accounting/set-up-accounting', async (req, res) => {
-    try {
-        await axios.get('http://localhost:9999/accounting/pdc')
-        await axios.get('http://localhost:9999/accounting/collection')
-        await axios.get('http://localhost:9999/accounting/deposit')
-        await axios.get('http://localhost:9999/accounting/returned-checks')
-        await axios.get('http://localhost:9999/accounting/petty-cash')
-        await axios.get('http://localhost:9999/accounting/cash-disbursement')
-        await axios.get('http://localhost:9999/accounting/pullout')
-        await axios.get('http://localhost:9999/accounting/postponement')
 
-        res.send({
-            message: "",
-            success: true,
-        })
-    } catch (err) {
-        res.send({
-            message: err.message,
-            success: false,
-        })
-    }
-})
 
 module.exports = {
     accountingRouter

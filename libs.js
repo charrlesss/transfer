@@ -88,7 +88,6 @@ async function fetchDataInBatches({ batchSize, query, cb }) {
                 ${query}
                 OFFSET ${offset} ROWS FETCH NEXT ${batchSize} ROWS ONLY;
             `;
-            console.log(querys)
             // Execute the query
             let { data } = await executeQueryToSQLServer(querys);
 
