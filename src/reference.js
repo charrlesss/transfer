@@ -1065,13 +1065,13 @@ referenceRouter.get('/reference/id-entry', async (req, res) => {
                         parameters: [
                             row.newID,
                             contact_details_id,
-                            row.Individual === 1 ? row.Firstname : "",
-                            row.Individual === 1 ? row.Lastname : "",
-                            row.Individual === 1 ? row.Middle : "",
-                            row.Individual === 1 ? "" : row.Shortname,
+                            row.Individual === true ? row.Firstname : "",
+                            row.Individual === true ? row.Lastname : "",
+                            row.Individual === true ? row.Middle : "",
+                            row.Individual === true ? "" : row.Shortname,
                             row.Address,
                             row.VatType,
-                            row.Individual === 1 ? "individual" : "company",
+                            row.Individual === true ? "individual" : "company",
                             row.TINNo,
                             Sub_Acct
                         ]
@@ -1105,6 +1105,7 @@ referenceRouter.get('/reference/id-entry', async (req, res) => {
                         ]
                     })
                 } else {
+                    console.log(row.Individual)
                     const contact_details_id = v4uuid()
 
                     const { data } = await executeQueryToMSQL({ query: `select Sub_Acct from sub_account where Acronym ='${row.Sub_Acct}'` })
@@ -1171,12 +1172,12 @@ referenceRouter.get('/reference/id-entry', async (req, res) => {
                         parameters: [
                             row.newID,
                             '',
-                            row.Individual === 1 ? row.Firstname : "",
-                            row.Individual === 1 ? row.Lastname : "",
-                            row.Individual === 1 ? row.Middle : "",
-                            row.Individual === 1 ? "" : row.Shortname,
+                            row.Individual === true ? row.Firstname : "",
+                            row.Individual === true ? row.Lastname : "",
+                            row.Individual === true ? row.Middle : "",
+                            row.Individual === true ? "" : row.Shortname,
                             row.Address,
-                            row.Individual === 1 ? "individual" : "company",
+                            row.Individual === true ? "individual" : "company",
                             Sub_Acct,
                             '',
                             '',
