@@ -795,6 +795,24 @@ referenceRouter.get('/reference/ctplp-registration', async (req, res) => {
 })
 referenceRouter.get('/reference/id-entry', async (req, res) => {
     try {
+        function cleanText(text) {
+                // Trim leading and trailing spaces
+            text = text.trim();
+
+            // Check if the text contains only one character and it's a period
+            if (text.length === 1 && text === '.') {
+                return '';  // Return an empty string
+            }
+
+            // Check if the first character is a comma
+            if (text.charAt(0) === ',') {
+                // Remove the comma and any space after it
+                text = text.substring(1).trim();
+            }
+
+            return text;
+        }
+
         await executeQueryToMSQL({ query: "delete from entry_agent" })
         await executeQueryToMSQL({ query: "delete from entry_employee" })
         await executeQueryToMSQL({ query: "delete from entry_fixed_assets" })
@@ -877,6 +895,11 @@ referenceRouter.get('/reference/id-entry', async (req, res) => {
                 ) id_entry
                 order by newID
             `, cb: async (row) => {
+                row.Firstname = cleanText(row.Firstname) 
+                row.Lastname = cleanText(row.Lastname) 
+                row.Middle = cleanText(row.Middle) 
+                row.Shortname = cleanText(row.Shortname)
+
                 if (row.newType === 'Agent') {
                     const contact_details_id = v4uuid()
 
