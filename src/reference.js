@@ -142,80 +142,7 @@ referenceRouter.get('/reference/bank', async (req, res) => {
         })
     }
 })
-referenceRouter.get('/reference/bank-account', async (req, res) => {
-    try {
 
-        await executeQueryToMSQL({ query: 'delete from bankaccounts ' })
-        await fetchDataInBatches({
-            batchSize: 1000,
-            query: `
-            SELECT  
-                 [Account_No]
-                ,[Account_Name]
-                ,[Account_Type]
-                ,[Desc]
-                ,[Option]
-                ,[Account ID] as Account_ID
-                ,[Inactive]
-                ,[Auto]
-                ,[IDNo]
-                ,[Identity]
-            FROM [Upward].[dbo].[BankAccounts]
-            ORDER BY [Account_No]
-            `, cb: async (row) => {
-                await executeQueryToMSQL({
-                    query: `
-                   INSERT INTO \`bankaccounts\`
-                    (\`Account_No\`,
-                    \`Account_Name\`,
-                    \`Account_Type\`,
-                    \`Desc\`,
-                    \`Option\`,
-                    \`Account_ID\`,
-                    \`Inactive\`,
-                    \`Auto\`,
-                    \`IDNo\`,
-                    \`Identity\`)
-                    VALUES
-                    (?,
-                    ?,
-                    ?,
-                    ?,
-                    ?,
-                    ?,
-                    ?,
-                    ?,
-                    ?,
-                    ?);
-
-                    `,
-                    parameters: [
-                        row.Account_No,
-                        row.Account_Name,
-                        row.Account_Type,
-                        row.Desc,
-                        row.Option,
-                        row.Account_ID,
-                        row.Inactive,
-                        row.Auto,
-                        row.IDNo,
-                        row.Identity,
-                    ]
-                })
-            }
-        })
-        res.send({
-            message: "",
-            success: true,
-        })
-    } catch (err) {
-        console.log(err)
-        res.send({
-            message: err.message,
-            success: false,
-        })
-    }
-})
 referenceRouter.get('/reference/booklet', async (req, res) => {
     try {
 
@@ -641,7 +568,6 @@ referenceRouter.get('/reference/subline', async (req, res) => {
             FROM [Upward].[dbo].[Subline]
             ORDER BY [ID]
             `, cb: async (row) => {
-                const Sub_Acct = v4uuid()
                 await executeQueryToMSQL({
                     query: `
                  INSERT INTO \`subline\`
@@ -1269,6 +1195,84 @@ referenceRouter.get('/reference/id-entry', async (req, res) => {
         })
 
     } catch (err) {
+        res.send({
+            message: err.message,
+            success: false,
+        })
+    }
+})
+
+referenceRouter.get('/reference/bank-account', async (req, res) => {
+    try {
+
+        await executeQueryToMSQL({ query: 'delete from bankaccounts ' })
+        await fetchDataInBatches({
+            batchSize: 1000,
+            query: `
+            SELECT  
+                [Account_No]
+                ,[Account_Name]
+                ,[Account_Type]
+                ,[Desc]
+                ,[Option]
+                ,[Account ID] as Account_ID
+                ,[BankAccounts].[Inactive]
+                ,[Auto]
+                ,[BankAccounts].[IDNo]
+                ,[Identity]
+            FROM [Upward].[dbo].[BankAccounts]
+            left join [Upward].[dbo].[ID Entry]  on [BankAccounts].IDNo = [ID Entry].IDNo 
+            where [ID Entry].IDNo  is not null
+            ORDER BY [Account_No]
+            `, cb: async (row) => {
+                await executeQueryToMSQL({
+                    query: `
+                   INSERT INTO \`bankaccounts\`
+                    (\`Account_No\`,
+                    \`Account_Name\`,
+                    \`Account_Type\`,
+                    \`Desc\`,
+                    \`Option\`,
+                    \`Account_ID\`,
+                    \`Inactive\`,
+                    \`Auto\`,
+                    \`IDNo\`,
+                    \`Identity\`)
+                    VALUES
+                    (?,
+                    ?,
+                    ?,
+                    ?,
+                    ?,
+                    ?,
+                    ?,
+                    ?,
+                    ?,
+                    ?);
+
+                    `,
+                    parameters: [
+                        row.Account_No,
+                        row.Account_Name,
+                        row.Account_Type,
+                        row.Desc,
+                        row.Option,
+                        row.Account_ID,
+                        row.Inactive,
+                        row.Auto,
+                        row.IDNo,
+                        row.Identity,
+                    ]
+                })
+            }
+        })
+        await executeQueryToMSQL({query:`update bankaccounts a left join table1 b on  a.IDNo = b.IDNo set  a.IDNo = b.Firstname;`})
+        res.send({
+            message: "",
+            success: true,
+        })
+    } catch (err) {
+        console.log(err)
         res.send({
             message: err.message,
             success: false,

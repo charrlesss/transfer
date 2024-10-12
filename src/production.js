@@ -1035,6 +1035,31 @@ productionRouter.get('/production/journal', async (req, res) => {
     }
 })
 
+productionRouter.get('/production/reset-production', async (req, res) => {
+    try {
+        await executeQueryToMSQL({ query: `delete from vpolicy` })
+        await executeQueryToMSQL({ query: `delete from cglpolicy` })
+        await executeQueryToMSQL({ query: `delete from bpolicy` })
+        await executeQueryToMSQL({ query: `delete from fpolicy` })
+        await executeQueryToMSQL({ query: `delete from mpolicy` })
+        await executeQueryToMSQL({ query: `delete from msprpolicy` })
+        await executeQueryToMSQL({ query: `delete from papolicy` })
+        await executeQueryToMSQL({ query: `delete from policy` })
+        await executeQueryToMSQL({ query: `delete from journal` })
+
+    
+        res.send({
+            message: "Successfully Reset Production",
+            success: true,
+        })
+    } catch (err) {
+        res.send({
+            message: err.message,
+            success: false,
+        })
+    }
+})
+
 
 module.exports = {
     productionRouter

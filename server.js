@@ -77,6 +77,7 @@ app.get('/setup-id-sequence', async (req, res) => {
         const { data: entry_supplier } = await executeQueryToMSQL({ query: `SELECT entry_supplier_id FROM entry_supplier order by entry_supplier_id desc limit 1; ` })
         await executeQueryToMSQL({ query: `update id_sequence set last_count='${entry_supplier[0].entry_supplier_id.split('-')[2]}', year = DATE_FORMAT(now(), '%y'), month=DATE_FORMAT(now(), '%m') where type = 'entry supplier'` })
 
+        
         res.send({
             message: "",
             success: true,
@@ -96,7 +97,6 @@ app.get('/set-up-database',async(req,res)=>{
         console.log('reference...')
         await axios.get('http://localhost:9999/reference/policy-account')
         await axios.get('http://localhost:9999/reference/bank')
-        await axios.get('http://localhost:9999/reference/bank-account')
         await axios.get('http://localhost:9999/reference/booklet')
         await axios.get('http://localhost:9999/reference/books')
         await axios.get('http://localhost:9999/reference/chart-account')
@@ -108,6 +108,7 @@ app.get('/set-up-database',async(req,res)=>{
         await axios.get('http://localhost:9999/reference/transaction-code')
         await axios.get('http://localhost:9999/reference/ctplp-registration')
         await axios.get('http://localhost:9999/reference/id-entry')
+        await axios.get('http://localhost:9999/reference/bank-account')
 
         console.log('production...')
         await axios.get('http://localhost:9999/production/vpolicy')
@@ -132,6 +133,7 @@ app.get('/set-up-database',async(req,res)=>{
 
         console.log('setup-id-sequence...')
         await axios.get('http://localhost:9999/setup-id-sequence')
+        console.log('set up database successfully')
 
         res.send({
             message: "",
@@ -144,6 +146,7 @@ app.get('/set-up-database',async(req,res)=>{
         })
     }
 })
+
 
 
 app.listen(PORT, () => console.log(`listen to port http://localhost:${PORT}`))

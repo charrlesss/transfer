@@ -1,7 +1,7 @@
 const express = require('express')
 const accountingRouter = express.Router()
 const { executeQueryToMSQL, fetchDataInBatches } = require("../libs")
-
+const axios = require("axios")
 
 accountingRouter.get('/accounting/pdc', async (req, res) => {
     try {
@@ -123,6 +123,7 @@ accountingRouter.get('/accounting/pdc', async (req, res) => {
             success: true,
         })
     } catch (err) {
+        console.log("pdc", err.message)
         res.send({
             message: err.message,
             success: false,
@@ -274,6 +275,8 @@ accountingRouter.get('/accounting/collection', async (req, res) => {
             success: true,
         })
     } catch (err) {
+        console.log("collection", err.message)
+
         res.send({
             message: err.message,
             success: false,
@@ -524,6 +527,8 @@ accountingRouter.get('/accounting/deposit', async (req, res) => {
             success: true,
         })
     } catch (err) {
+        console.log("deposit", err.message)
+
         res.send({
             message: err.message,
             success: false,
@@ -627,6 +632,8 @@ accountingRouter.get('/accounting/returned-checks', async (req, res) => {
             success: true,
         })
     } catch (err) {
+        console.log("returned-checks", err.message)
+
         res.send({
             message: err.message,
             success: false,
@@ -734,6 +741,8 @@ accountingRouter.get('/accounting/petty-cash', async (req, res) => {
             success: true,
         })
     } catch (err) {
+        console.log("petty-cash", err.message)
+
         res.send({
             message: err.message,
             success: false,
@@ -885,6 +894,8 @@ accountingRouter.get('/accounting/general-journal', async (req, res) => {
             success: true,
         })
     } catch (err) {
+        console.log("general-journal", err.message)
+
         res.send({
             message: err.message,
             success: false,
@@ -1034,6 +1045,8 @@ accountingRouter.get('/accounting/cash-disbursement', async (req, res) => {
             success: true,
         })
     } catch (err) {
+        console.log("cash-disbursement", err.message)
+
         res.send({
             message: err.message,
             success: false,
@@ -1192,6 +1205,8 @@ accountingRouter.get('/accounting/pullout', async (req, res) => {
             success: true,
         })
     } catch (err) {
+        console.log("pullout", err.message)
+
         res.send({
             message: err.message,
             success: false,
@@ -1343,7 +1358,6 @@ accountingRouter.get('/accounting/postponement', async (req, res) => {
                 ,[Used_DateTime]
                 ,RIGHT('000000' + CAST(ROW_NUMBER() OVER (ORDER BY (SELECT NULL)) AS VARCHAR(5)), 5) AS postponement_auth_codes_id
             FROM [Upward].[dbo].[Postponement_Auth_Codes]
-
             left join [Upward].[dbo].[Postponement_Detail] on  [Postponement_Auth_Codes].RPCD = [Postponement_Detail].RPCDNo
             where [Postponement_Detail].NewCheckDate >= '2020-01-01'
             order by RPCD
@@ -1381,7 +1395,31 @@ accountingRouter.get('/accounting/postponement', async (req, res) => {
             }
         })
 
-        await fetchDataInBatches({ query: `update  postponement a left join table1 b on a.PNNo = b.IDNo  set  a.PNNo = b.Firstname where b.Firstname is not null; ` })
+        await executeQueryToMSQL({ query: `update  postponement a left join table1 b on a.PNNo = b.IDNo  set  a.PNNo = b.Firstname where b.Firstname is not null; ` })
+        res.send({
+            message: "",
+            success: true,
+        })
+    } catch (err) {
+        console.log("postponement", err.message)
+
+        res.send({
+            message: err.message,
+            success: false,
+        })
+    }
+})
+accountingRouter.get('/accounting/set-up-accounting', async (req, res) => {
+    try {
+        await axios.get('http://localhost:9999/accounting/pdc')
+        await axios.get('http://localhost:9999/accounting/collection')
+        await axios.get('http://localhost:9999/accounting/deposit')
+        await axios.get('http://localhost:9999/accounting/returned-checks')
+        await axios.get('http://localhost:9999/accounting/petty-cash')
+        await axios.get('http://localhost:9999/accounting/cash-disbursement')
+        await axios.get('http://localhost:9999/accounting/pullout')
+        await axios.get('http://localhost:9999/accounting/postponement')
+
         res.send({
             message: "",
             success: true,
@@ -1393,8 +1431,35 @@ accountingRouter.get('/accounting/postponement', async (req, res) => {
         })
     }
 })
-
-
+accountingRouter.get('/accounting/reset-accounting', async (req, res) => {
+    try {
+       
+        await executeQueryToMSQL({ query: `delete from pdc` })
+        await executeQueryToMSQL({ query: `delete from collection` })
+        await executeQueryToMSQL({ query: `delete from deposit` })
+        await executeQueryToMSQL({ query: `delete from deposit_slip` })
+        await executeQueryToMSQL({ query: `delete from cash_breakdown` })
+        await executeQueryToMSQL({ query: `delete from return_checks` })
+        await executeQueryToMSQL({ query: `delete from petty_cash` })
+        await executeQueryToMSQL({ query: `delete from journal_voucher` })
+        await executeQueryToMSQL({ query: `delete from cash_disbursement` })
+        await executeQueryToMSQL({ query: `delete from pullout_request` })
+        await executeQueryToMSQL({ query: `delete from pullout_request_details` })
+        await executeQueryToMSQL({ query: `delete from pullout_auth_codes` })
+        await executeQueryToMSQL({ query: `delete from postponement` })
+        await executeQueryToMSQL({ query: `delete from postponement_detail` })
+        await executeQueryToMSQL({ query: `delete from postponement_auth_codes` })
+        res.send({
+            message: "Successfully Reset Accounting",
+            success: true,
+        })
+    } catch (err) {
+        res.send({
+            message: err.message,
+            success: false,
+        })
+    }
+})
 module.exports = {
     accountingRouter
 }
